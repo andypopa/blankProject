@@ -78,24 +78,18 @@ FExpressionInput& UMaterialCreator::GetExpressionInput(ETextureType TextureType,
 	return *(new FExpressionInput());
 }
 
-void UMaterialCreator::RenameAsset(FAssetData AssetData)
+void UMaterialCreator::RenameAsset(FAssetData AssetData, FString Id)
 {
 	auto Asset = AssetData.GetAsset();
 	auto Path = AssetData.ObjectPath.ToString();
-	//temp = TEXT("/Game/'" + Name + "'");
-	//fileManager.MakeDirectory(TEXT("/Engine/TestMaterial"));
+	//fileManager.MakeDirectory(TEXT("/Engine/" + Id));
 	auto Dest = Path.Replace(TEXT("/Game"), TEXT("/Engine"));
-	//auto copyResult = fileManager.Copy(*Dest, *Path);
-	//load assets 
-	// Create material from texture
 
 	//renaming logic
-
 	FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
 	TArray<FAssetRenameData> AssetsAndNames;
 	const FString PackagePath = FPackageName::GetLongPackagePath(Asset->GetOutermost()->GetName());
-	//fileManager.MakeDirectory(TEXT("/Engine/TestMaterial"));
-	new(AssetsAndNames)FAssetRenameData(Asset, FString("/Engine/TestMaterial"), Asset->GetName());
+	new(AssetsAndNames)FAssetRenameData(Asset, FString("/Engine/" + Id), Asset->GetName());
 	AssetToolsModule.Get().RenameAssets(AssetsAndNames);
 
 	FAssetRegistryModule::AssetRenamed(Asset, Path);
@@ -104,7 +98,7 @@ void UMaterialCreator::RenameAsset(FAssetData AssetData)
 	UE_LOG(LogTemp, Warning, TEXT("New Name: %s"), *Asset->GetFullName());
 }
 
-void UMaterialCreator::AssignTextureToMaterial(FAssetData TextureAssetData, UMaterial* Material)
+void UMaterialCreator::AssignTextureToMaterial(FAssetData TextureAssetData, UMaterial* Material, FString Id)
 {
 	UMaterialCreator::ETextureType TextureType = UMaterialCreator::GetTextureType(TextureAssetData);
 
@@ -142,69 +136,69 @@ void UMaterialCreator::AssignTextureToMaterial(FAssetData TextureAssetData, UMat
 	Material->PostEditChange();
 }
 
-bool UMaterialCreator::CreateMaterial(UMaterial*& Material, UPackage*& MaterialAssetPackage, FString& MaterialName)
-{
-	IFileManager& fileManager = IFileManager::Get();
 
-	UMaterial* CreatedMaterial = nullptr;
-	UTexture* DiffuseTexture = nullptr;
-	UPackage* AssetPackage = nullptr;
 
-	TArray<FAssetData> AssetDataList;
-	AssetDataList = UMaterialCreator::GetAssetDataList(false);
-	for (auto AssetData : AssetDataList) {
-		UMaterialCreator::RenameAsset(AssetData);
-	}
-	AssetDataList = UMaterialCreator::GetAssetDataList(true);
-
-	auto CreateMaterialInternalTuple = CreateMaterialInternal();
-	CreatedMaterial = CreateMaterialInternalTuple.Key;
-	AssetPackage = CreateMaterialInternalTuple.Value;
-	if (CreatedMaterial)
+	bool UMaterialCreator::CreateMaterial(UMaterial*& Material, UPackage*& MaterialAssetPackage, FString Id)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Created new material (%s) from diffuse texture"), *CreatedMaterial->GetName());
-	}
-	else return false;
 
-	Material = CreatedMaterial;
-	MaterialAssetPackage = AssetPackage;
-	MaterialName = CreatedMaterial->GetName();
+		IFileManager& fileManager = IFileManager::Get();
 
+		UMaterial* CreatedMaterial = nullptr;
+		UTexture* DiffuseTexture = nullptr;
+		UPackage* AssetPackage = nullptr;
 
-
-	for (auto AssetData : AssetDataList) {
-		UMaterialCreator::AssignTextureToMaterial(AssetData, CreatedMaterial);
-	}
-
-	if (CreatedMaterial)
-	{
-		CreatedMaterial->PostEditChange();
-		CreatedMaterial->ForceRecompileForRendering();
-		if (AssetPackage)
-		{
-			AssetPackage->MarkPackageDirty();
+		TArray<FAssetData> AssetDataList;
+		AssetDataList = UMaterialCreator::GetAssetDataList(false, Id);
+		for (auto AssetData : AssetDataList) {
+			UMaterialCreator::RenameAsset(AssetData, Id);
 		}
-		//UE_LOG(LogTemp, Display, TEXT("Can not create new texture simple for (%s) from texture (%s)"), *CreatedMaterial->GetName(), *DiffuseTexture->GetName());
+		AssetDataList = UMaterialCreator::GetAssetDataList(true, Id);
+
+		auto CreateMaterialInternalTuple = CreateMaterialInternal(Id);
+		CreatedMaterial = CreateMaterialInternalTuple.Key;
+		AssetPackage = CreateMaterialInternalTuple.Value;
+		if (CreatedMaterial)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Created new material (%s) from diffuse texture"), *CreatedMaterial->GetName());
+		}
+		else return false;
+
+		Material = CreatedMaterial;
+		MaterialAssetPackage = AssetPackage;
+
+		for (auto AssetData : AssetDataList) {
+			UMaterialCreator::AssignTextureToMaterial(AssetData, CreatedMaterial, Id);
+		}
+
+		if (CreatedMaterial)
+		{
+			CreatedMaterial->PostEditChange();
+			CreatedMaterial->ForceRecompileForRendering();
+			if (AssetPackage)
+			{
+				AssetPackage->MarkPackageDirty();
+			}
+			//UE_LOG(LogTemp, Display, TEXT("Can not create new texture simple for (%s) from texture (%s)"), *CreatedMaterial->GetName(), *DiffuseTexture->GetName());
+		}
+		else return false;
+
+		return true;
 	}
-	else return false;
 
-	return true;
-}
-
-TTuple<UMaterial*, UPackage*> UMaterialCreator::CreateMaterialInternal()
+TTuple<UMaterial*, UPackage*> UMaterialCreator::CreateMaterialInternal(FString Id)
 {
-	auto AssetDataList = UMaterialCreator::GetAssetDataList(true);
+	auto AssetDataList = UMaterialCreator::GetAssetDataList(true, Id);
 	auto DiffuseTextureAssetData = UMaterialCreator::GetDiffuseTextureAssetData(AssetDataList);
 	auto DiffuseTextureAsset = DiffuseTextureAssetData.GetAsset();
 	auto DiffuseTexturePath = DiffuseTextureAssetData.ObjectPath.ToString();
 	auto DiffuseTexture = Cast<UTexture>(StaticLoadObject(UTexture::StaticClass(), NULL, *DiffuseTexturePath));
 
-	auto MaterialAssetName = FString::Printf(TEXT("%s_Mat"), *DiffuseTexture->GetName());
+	auto MaterialAssetName = FString::Printf(TEXT("M_%s"), *Id);
 
 	UMaterialFactoryNew* Factory = NewObject<UMaterialFactoryNew>();
 	Factory->InitialTexture = DiffuseTexture;
 
-	FString Dir = "/Engine/TestMaterial";
+	FString Dir = "/Engine/" + Id;
 	const FString PackageName = Dir + TEXT("/") + MaterialAssetName;
 
 	UPackage* MaterialAssetPackage = CreatePackage(NULL, *PackageName);
@@ -222,15 +216,15 @@ TTuple<UMaterial*, UPackage*> UMaterialCreator::CreateMaterialInternal()
 	return MakeTuple(CreatedMaterial, MaterialAssetPackage);
 }
 
-TArray<FAssetData> UMaterialCreator::GetAssetDataList(bool bEngine)
+TArray<FAssetData> UMaterialCreator::GetAssetDataList(bool bEngine, FString Id)
 {
 	TArray<FAssetData> AssetData;
 	UObjectLibrary* ObjectLibrary = NewObject<UObjectLibrary>(UObjectLibrary::StaticClass());
 	ObjectLibrary->UseWeakReferences(false);
 	if (bEngine)
-		ObjectLibrary->LoadAssetDataFromPath(FString(TEXT("/Engine/TestMaterial")));
+		ObjectLibrary->LoadAssetDataFromPath(FString(TEXT("/Engine/") + Id));
 	else
-		ObjectLibrary->LoadAssetDataFromPath(FString(TEXT("/Game/TestMaterial")));
+		ObjectLibrary->LoadAssetDataFromPath(FString(TEXT("/Game/") + Id));
 
 	ObjectLibrary->LoadAssetsFromAssetData();
 	ObjectLibrary->GetAssetDataList(AssetData);
@@ -250,12 +244,12 @@ FAssetData UMaterialCreator::GetDiffuseTextureAssetData(TArray<FAssetData> Asset
 }
 
 
-void UMaterialCreator::SaveAsset(UObject* MaterialAsset, UPackage* MaterialAssetPackage)
+void UMaterialCreator::SaveAsset(UObject* MaterialAsset, UPackage* MaterialAssetPackage, FString Id)
 {
 	//FString AssetPath = FString("/Engine/" + CreatedAsset->GetName());
 	//UPackage *Package = CreatePackage(nullptr, *AssetPath);
 	//FString FilePath = FString::Printf(TEXT("%s%s"), *AssetPath, *FPackageName::GetAssetPackageExtension());
-	bool bSuccess = UPackage::SavePackage(MaterialAssetPackage, MaterialAsset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FString("/Engine/TestMaterial/T_Text_D_Mat.uasset"));
+	bool bSuccess = UPackage::SavePackage(MaterialAssetPackage, MaterialAsset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FString("/Engine/" + Id + "/M_" + Id + ".uasset"));
 
 	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("True") : TEXT("False"));
 }

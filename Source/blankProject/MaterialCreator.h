@@ -73,15 +73,15 @@ public:
 	enum ETextureType { BaseColor, Specular, Roughness, Normal, AmbientOcclusion, None };
 
 	UFUNCTION(BlueprintCallable, Category = "Material Creator")
-		static bool CreateMaterial(UMaterial*& Material, UPackage*& MaterialAssetPackage, FString& MaterialName);
+		static bool CreateMaterial(UMaterial*& Material, UPackage*& MaterialAssetPackage, FString Id);
 	UFUNCTION(BlueprintCallable, Category = "Save")
-		static void SaveAsset(UObject* MaterialAsset, UPackage* MaterialAssetPackage);
+		static void SaveAsset(UObject* MaterialAsset, UPackage* MaterialAssetPackage, FString Id);
 	static UMaterialCreator::ETextureType GetTextureType(FAssetData TextureAssetData);
-	static TTuple<UMaterial*, UPackage*> CreateMaterialInternal();
-	static TArray<FAssetData> GetAssetDataList(bool bEngine);
+	static TTuple<UMaterial*, UPackage*> CreateMaterialInternal(FString Id);
+	static TArray<FAssetData> GetAssetDataList(bool bEngine, FString Id);
 	static FAssetData GetDiffuseTextureAssetData(TArray<FAssetData> AssetDataList);
 	static FExpressionInput& GetExpressionInput(ETextureType TextureType, UMaterial* Material);
-	static void AssignTextureToMaterial(FAssetData TextureAssetData, UMaterial* Material);
-	static void RenameAsset(FAssetData AssetData);
+	static void AssignTextureToMaterial(FAssetData TextureAssetData, UMaterial* Material, FString Id);
+	static void RenameAsset(FAssetData AssetData, FString Id);
 };
 
