@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "blankProject.h"
 #include "MyClass.h"
+#include "blankProject.h"
 
 MyClass::MyClass()
 {

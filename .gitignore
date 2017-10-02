@@ -10,3 +10,6 @@ Saved
 *.suo
 *.xcodeproj
 *.xcworkspace
+.git
+gitdont
+.vs/blankProject/v15/

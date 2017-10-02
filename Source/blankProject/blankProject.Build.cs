@@ -4,18 +4,65 @@ using UnrealBuildTool;
 
 public class blankProject : ModuleRules
 {
-	public blankProject(TargetInfo Target)
-	{
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+    public blankProject(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+        //PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
 
-		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
-		
-		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
+        //PrivateDependencyModuleNames.AddRange(new string[] {  });
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                "Editor/MaterialEditor/Private"
+            }
+        );
 
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
-	}
+        PrivateIncludePathModuleNames.AddRange(
+             new string[]
+             {
+                "AssetRegistry",
+                "AssetTools",
+                "Kismet",
+                "EditorWidgets"
+             }
+         );
+
+        PrivateDependencyModuleNames.AddRange(
+             new string[] {
+                "AppFramework",
+                "Core",
+                "CoreUObject",
+                "InputCore",
+                "Engine",
+                "Slate",
+                "SlateCore",
+                "EditorStyle",
+                "ShaderCore",
+                "RenderCore",
+                "RHI",
+                "UnrealEd",
+                "MaterialUtilities",
+                "PropertyEditor",
+                "GraphEditor",
+             }
+         );
+
+        DynamicallyLoadedModuleNames.AddRange(
+             new string[] {
+                "AssetTools",
+                "MainFrame",
+                "SceneOutliner",
+                "ClassViewer",
+                "ContentBrowser",
+                "WorkspaceMenuStructure"
+             }
+         );
+        // Uncomment if you are using Slate UI
+        // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+
+        // Uncomment if you are using online features
+        // PrivateDependencyModuleNames.Add("OnlineSubsystem");
+
+        // To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+    }
 }
