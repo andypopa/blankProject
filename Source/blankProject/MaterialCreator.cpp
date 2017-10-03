@@ -57,6 +57,9 @@
 #include "AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 
+#include "Developer/AssetTools/Private/AssetRenameManager.h"
+#include "MobilikonAssetRenameManager.h"
+
 UMaterialCreator::ETextureType UMaterialCreator::GetTextureType(FAssetData TextureAssetData)
 {
 	auto Name = TextureAssetData.GetAsset()->GetName();
@@ -90,13 +93,84 @@ void UMaterialCreator::RenameAsset(FAssetData AssetData, FString Id)
 	TArray<FAssetRenameData> AssetsAndNames;
 	const FString PackagePath = FPackageName::GetLongPackagePath(Asset->GetOutermost()->GetName());
 	new(AssetsAndNames)FAssetRenameData(Asset, FString("/Engine/" + Id), Asset->GetName());
-	AssetToolsModule.Get().RenameAssets(AssetsAndNames);
-
+	TSharedRef<MobilikonAssetRenameManager> AssetRenameManager = MakeShareable(new MobilikonAssetRenameManager);
+	AssetRenameManager->RenameAssets(AssetsAndNames);
+	//UMaterialCreator::RenameAssets(AssetsAndNames);
 	FAssetRegistryModule::AssetRenamed(Asset, Path);
 	Asset->MarkPackageDirty();
 	Asset->GetOuter()->MarkPackageDirty();
 	UE_LOG(LogTemp, Warning, TEXT("New Name: %s"), *Asset->GetFullName());
 }
+//
+//void UMaterialCreator::RenameAssets(TArray<FAssetRenameData>& AssetsAndNames)
+//{
+//	TSharedRef<FAssetRenameManager> AssetRenameManager = MakeShareable(new FAssetRenameManager);
+//	// Prep a list of assets to rename with an extra boolean to determine if they should leave a redirector or not
+//	TArray<FAssetRenameDataWithReferencers> AssetsToRename;
+//	AssetsToRename.Reset(AssetsAndNames.Num());
+//	for (const FAssetRenameData& AssetRenameData : AssetsAndNames)
+//	{
+//		AssetsToRename.Emplace(FAssetRenameDataWithReferencers(AssetRenameData));
+//	}
+//
+//	// Warn the user if they are about to rename an asset that is referenced by a CDO
+//	auto CDOAssets = FindCDOReferencedAssets(AssetsToRename);
+//
+//	// Warn the user if there were any references
+//	if (CDOAssets.Num())
+//	{
+//		FString AssetNames;
+//		for (auto AssetIt = CDOAssets.CreateConstIterator(); AssetIt; ++AssetIt)
+//		{
+//			UObject* Asset = (*AssetIt).Get();
+//			if (Asset)
+//			{
+//				AssetNames += FString("\n") + Asset->GetName();
+//			}
+//		}
+//
+//		const FText MessageText = FText::Format(LOCTEXT("RenameCDOReferences", "The following assets are referenced by one or more Class Default Objects: \n{0}\n\nContinuing with the rename may require code changes to fix these references. Do you wish to continue?"), FText::FromString(AssetNames));
+//		if (FMessageDialog::Open(EAppMsgType::YesNo, MessageText) == EAppReturnType::No)
+//		{
+//			return;
+//		}
+//	}
+//
+//	// Fill out the referencers for the assets we are renaming
+//	PopulateAssetReferencers(AssetsToRename);
+//
+//	// Update the source control state for the packages containing the assets we are renaming if source control is enabled. If source control is enabled and this fails we can not continue.
+//	if (UpdatePackageStatus(AssetsToRename))
+//	{
+//		// Detect whether the assets are being referenced by a collection. Assets within a collection must leave a redirector to avoid the collection losing its references.
+//		DetectReferencingCollections(AssetsToRename);
+//
+//		// Load all referencing packages and mark any assets that must have redirectors.
+//		TArray<UPackage*> ReferencingPackagesToSave;
+//		LoadReferencingPackages(AssetsToRename, ReferencingPackagesToSave);
+//
+//		// Prompt to check out source package and all referencing packages, leave redirectors for assets referenced by packages that are not checked out and remove those packages from the save list.
+//		const bool bUserAcceptedCheckout = CheckOutPackages(AssetsToRename, ReferencingPackagesToSave);
+//
+//		if (bUserAcceptedCheckout)
+//		{
+//			// If any referencing packages are left read-only, the checkout failed or SCC was not enabled. Trim them from the save list and leave redirectors.
+//			DetectReadOnlyPackages(AssetsToRename, ReferencingPackagesToSave);
+//
+//			// Perform the rename, leaving redirectors only for assets which need them
+//			PerformAssetRename(AssetsToRename);
+//
+//			// Save all packages that were referencing any of the assets that were moved without redirectors
+//			SaveReferencingPackages(ReferencingPackagesToSave);
+//
+//			// Issue post rename event
+//			AssetPostRenameEvent.Broadcast(AssetsAndNames);
+//		}
+//	}
+//
+//	// Finally, report any failures that happened during the rename
+//	ReportFailures(AssetsToRename);
+//}
 
 void UMaterialCreator::AssignTextureToMaterial(FAssetData TextureAssetData, UMaterial* Material, FString Id)
 {

@@ -83,5 +83,6 @@ public:
 	static FExpressionInput& GetExpressionInput(ETextureType TextureType, UMaterial* Material);
 	static void AssignTextureToMaterial(FAssetData TextureAssetData, UMaterial* Material, FString Id);
 	static void RenameAsset(FAssetData AssetData, FString Id);
+	//static void RenameAssets(TArray<FAssetRenameData>& AssetsAndNames);
 };
 
