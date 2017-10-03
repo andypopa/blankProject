@@ -28,6 +28,7 @@ int32 UMaterialCreatorCommandlet::Main(const FString& CmdLine)
 		{
 			UE_LOG(LogTemp, Display, TEXT("Material ID: %s\nCreating material..."), *Elem.Value);
 			UMaterialCreator::CreateMaterial(Material, MaterialPackage, Elem.Value);
+			UMaterialCreator::SaveAsset(Material, MaterialPackage, Elem.Value);
 			return 0;
 		}
 		else
