@@ -72,7 +72,7 @@ class BLANKPROJECT_API UMaterialCreator : public UObject
 public:
 	enum ETextureType { BaseColor, Specular, Roughness, Normal, AmbientOcclusion, None };
 
-	UFUNCTION(BlueprintCallable, Category = "Material Creator")
+	UFUNCTION(BlueprintPure, Category = "Material Creator")
 		static bool CreateMaterial(UMaterial*& Material, UPackage*& MaterialAssetPackage, FString Id);
 	UFUNCTION(BlueprintCallable, Category = "Save")
 		static void SaveAsset(UObject* MaterialAsset, UPackage* MaterialAssetPackage, FString Id);
