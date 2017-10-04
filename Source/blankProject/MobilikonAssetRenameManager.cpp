@@ -42,7 +42,6 @@
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Misc/RedirectCollector.h"
-
 #define LOCTEXT_NAMESPACE "AssetRenameManager"
 
 struct FAssetRenameDataWithReferencers : public FAssetRenameData
@@ -72,7 +71,7 @@ void MobilikonAssetRenameManager::RenameAssets(const TArray<FAssetRenameData>& A
 	//	// Open a dialog asking the user to wait while assets are being discovered
 	//	SDiscoveringAssetsDialog::OpenDiscoveringAssetsDialog(
 	//		SDiscoveringAssetsDialog::FOnAssetsDiscovered::CreateSP(this, &MobilikonAssetRenameManager::FixReferencesAndRename, AssetsAndNames)
-	//	);
+	//	); 
 	//}
 	//else
 	//{
@@ -641,7 +640,7 @@ void MobilikonAssetRenameManager::PerformAssetRename(TArray<FAssetRenameDataWith
 			(*PackageIt)->RemoveFromRoot();
 		}
 
-		ObjectTools::CleanupAfterSuccessfulDelete(PotentialPackagesToDelete);
+		//ObjectTools::CleanupAfterSuccessfulDelete(PotentialPackagesToDelete);
 	}
 }
 

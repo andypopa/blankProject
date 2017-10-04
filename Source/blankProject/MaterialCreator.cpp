@@ -99,7 +99,7 @@ void UMaterialCreator::RenameAsset(FAssetData AssetData, FString Id)
 	FAssetRegistryModule::AssetRenamed(Asset, Path);
 	Asset->MarkPackageDirty();
 	Asset->GetOuter()->MarkPackageDirty();
-	UE_LOG(LogTemp, Warning, TEXT("New Name: %s"), *Asset->GetFullName());
+	UE_LOG(LogTemp, Display, TEXT("New Name: %s"), *Asset->GetFullName());
 }
 //
 //void UMaterialCreator::RenameAssets(TArray<FAssetRenameData>& AssetsAndNames)
@@ -321,11 +321,11 @@ FAssetData UMaterialCreator::GetDiffuseTextureAssetData(TArray<FAssetData> Asset
 void UMaterialCreator::SaveAsset(UObject* MaterialAsset, UPackage* MaterialAssetPackage, FString Id)
 {
 	auto ECDAbsPath = FPaths::ConvertRelativePathToFull(FPaths::EngineContentDir());
-	UE_LOG(LogTemp, Warning, TEXT("R2F EngineContentDir: %s"), *ECDAbsPath);
+	UE_LOG(LogTemp, Display, TEXT("R2F EngineContentDir: %s"), *ECDAbsPath);
 	//FString AssetPath = FString("/Engine/" + CreatedAsset->GetName());
 	//UPackage *Package = CreatePackage(nullptr, *AssetPath);
 	//FString FilePath = FString::Printf(TEXT("%s%s"), *AssetPath, *FPackageName::GetAssetPackageExtension());
 	bool bSuccess = UPackage::SavePackage(MaterialAssetPackage, MaterialAsset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FString(ECDAbsPath + Id + "/M_" + Id + ".uasset"));
 
-	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("True") : TEXT("False"));
+	UE_LOG(LogTemp, Display, TEXT("Saved Package: %s"), bSuccess ? TEXT("True") : TEXT("False"));
 }
