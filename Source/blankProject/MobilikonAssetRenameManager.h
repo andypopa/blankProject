@@ -31,7 +31,7 @@ public:
 	* @param PackagesToCheck Packages to check for referencing FStringAssetReference.
 	* @param AssetRedirectorMap Map from old asset path to new asset path
 	*/
-	static void RenameReferencingStringAssetReferences(const TArray<UPackage *> PackagesToCheck, const TMap<FString, FString>& AssetRedirectorMap);
+	static void RenameReferencingStringAssetReferences(const TArray<UPackage *> PackagesToCheck, const TMap<FSoftObjectPath, FSoftObjectPath>& AssetRedirectorMap);
 
 private:
 	/** Attempts to load and fix redirector references for the supplied assets */

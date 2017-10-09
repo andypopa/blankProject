@@ -4,6 +4,7 @@
 #include "MaterialCreator.h"
 #include "Editor.h"
 #include "UnrealEdGlobals.h"
+#include "Editor/UnrealEdEngine.h"
 
 UMaterialCreatorCommandlet::UMaterialCreatorCommandlet()
 {

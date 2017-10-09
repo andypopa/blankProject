@@ -11,30 +11,20 @@
 #include "Modules/ModuleManager.h"
 #include "UObject/UObjectHash.h"
 #include "UObject/UObjectIterator.h"
-#include "UObject/UnrealType.h"
-#include "Layout/Margin.h"
-#include "Input/Reply.h"
-#include "Widgets/DeclarativeSyntaxSupport.h"
-#include "Widgets/SCompoundWidget.h"
-#include "Widgets/SBoxPanel.h"
-#include "Widgets/SWindow.h"
+
+
 #include "Layout/WidgetPath.h"
 #include "SlateOptMacros.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Widgets/Layout/SBorder.h"
-#include "Widgets/Text/STextBlock.h"
-#include "Widgets/Input/SButton.h"
-#include "Widgets/Views/STableViewBase.h"
-#include "Widgets/Views/STableRow.h"
-#include "Widgets/Views/SListView.h"
-#include "EditorStyleSet.h"
-#include "ISourceControlOperation.h"
-#include "SourceControlOperations.h"
+
+
+
 #include "ISourceControlModule.h"
 #include "FileHelpers.h"
 //#include "SDiscoveringAssetsDialog.h"
 #include "AssetRegistryModule.h"
-#include "CollectionManagerTypes.h"
+
 #include "ICollectionManager.h"
 #include "CollectionManagerModule.h"
 #include "ObjectTools.h"
@@ -462,7 +452,7 @@ void MobilikonAssetRenameManager::DetectReadOnlyPackages(TArray<FAssetRenameData
 	}
 }
 
-void MobilikonAssetRenameManager::RenameReferencingStringAssetReferences(const TArray<UPackage *> PackagesToCheck, const TMap<FString, FString>& AssetRedirectorMap)
+void MobilikonAssetRenameManager::RenameReferencingStringAssetReferences(const TArray<UPackage *> PackagesToCheck, const TMap<FSoftObjectPath, FSoftObjectPath>& AssetRedirectorMap)
 {
 	struct FStringAssetReferenceRenameSerializer : public FArchiveUObject
 	{
@@ -474,9 +464,10 @@ void MobilikonAssetRenameManager::RenameReferencingStringAssetReferences(const T
 	};
 
 	// Add redirects as needed
-	for (const TPair<FString, FString>& Pair : AssetRedirectorMap)
+	for (const TPair<FSoftObjectPath, FSoftObjectPath>& Pair : AssetRedirectorMap)
 	{
-		GRedirectCollector.AddAssetPathRedirection(Pair.Key, Pair.Value);
+	//GRedirectCollector.AddAssetPathRedirection(Pair.Key, Pair.Value);
+	GRedirectCollector.AddAssetPathRedirection(Pair.Key.GetAssetPathName(), Pair.Value.GetAssetPathName());
 	}
 
 	FStringAssetReferenceRenameSerializer RenameSerializer;
@@ -543,7 +534,7 @@ void MobilikonAssetRenameManager::PerformAssetRename(TArray<FAssetRenameDataWith
 		ObjectTools::FPackageGroupName PGN;
 		PGN.ObjectName = RenameData.NewName;
 		PGN.GroupName = TEXT("");
-		PGN.PackageName = RenameData.PackagePath / PGN.ObjectName;
+		PGN.PackageName = RenameData.NewPackagePath / PGN.ObjectName;
 		const bool bLeaveRedirector = RenameData.bCreateRedirector;
 
 		UPackage* OldPackage = Asset->GetOutermost();
@@ -595,7 +586,7 @@ void MobilikonAssetRenameManager::PerformAssetRename(TArray<FAssetRenameDataWith
 			}
 		}
 
-		TMap<FString, FString> RedirectorMap;
+		TMap<FSoftObjectPath, FSoftObjectPath> RedirectorMap;
 		RedirectorMap.Add(OldAssetPath, Asset->GetPathName());
 
 		if (UBlueprint* Blueprint = Cast<UBlueprint>(Asset))
@@ -605,6 +596,7 @@ void MobilikonAssetRenameManager::PerformAssetRename(TArray<FAssetRenameDataWith
 			RedirectorMap.Add(FString::Printf(TEXT("Default__%s_C"), *OldAssetPath), FString::Printf(TEXT("Default__%s_C"), *Asset->GetPathName()));
 		}
 
+		
 		RenameReferencingStringAssetReferences(PackagesToCheck, RedirectorMap);
 	}
 
