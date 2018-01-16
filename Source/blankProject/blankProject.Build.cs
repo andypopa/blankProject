@@ -8,7 +8,7 @@ public class blankProject : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        //PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+        PublicDependencyModuleNames.AddRange(new string[] { "AssetRegistry", "Core", "CoreUObject", "Engine", "InputCore", "Http", "Json", "JsonUtilities", "UMG" });
 
         //PrivateDependencyModuleNames.AddRange(new string[] {  });
         PrivateIncludePaths.AddRange(
@@ -43,6 +43,7 @@ public class blankProject : ModuleRules
                 "UnrealEd",
                 "MaterialUtilities",
                 "PropertyEditor",
+                "PakFile",
                 "GraphEditor",
              }
          );

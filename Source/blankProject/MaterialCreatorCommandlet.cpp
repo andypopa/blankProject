@@ -19,7 +19,6 @@ int32 UMaterialCreatorCommandlet::Main(const FString& CmdLine)
 	TMap < FString, FString > Params;
     TArray < FString >  Tokens;
 	TArray < FString >  Switches;
-		
 	
 	UMaterial* Material;
 	UPackage* MaterialPackage;
@@ -57,6 +56,7 @@ int32 UMaterialCreatorCommandlet::Main(const FString& CmdLine)
 			return -1;
 		}
 	}
+	
 	return 0;
 }
 
